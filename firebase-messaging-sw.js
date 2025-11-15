@@ -2,20 +2,18 @@
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js");
 
-// AVISO IMPORTANTE: As configurações do Firebase agora são injetadas
-// pelo processo de build do Vite, lendo as variáveis de ambiente (VITE_*).
-// A sintaxe direta `import.meta.env.VITE_*` é necessária para que a substituição estática funcione.
-// O fallback `|| 'valor'` garante que o Service Worker não quebre em ambientes onde
-// as variáveis não são injetadas, embora a notificação push só funcione corretamente em produção.
+// AVISO IMPORTANTE: A sintaxe foi atualizada para usar "optional chaining" (?.)
+// Isso garante que o código funcione tanto no ambiente de preview (onde import.meta.env não existe)
+// quanto no deploy do Netlify (onde Vite substitui a variável).
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "app-move-motorista.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "app-move-motorista",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "app-move-motorista.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "746812406976",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:746812406976:web:110a4c6406f67140b34125",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-QWHJM4S6NX"
+  apiKey: import.meta.env?.VITE_FIREBASE_API_KEY || "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
+  authDomain: import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN || "app-move-motorista.firebaseapp.com",
+  projectId: import.meta.env?.VITE_FIREBASE_PROJECT_ID || "app-move-motorista",
+  storageBucket: import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET || "app-move-motorista.appspot.com",
+  messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "746812406976",
+  appId: import.meta.env?.VITE_FIREBASE_APP_ID || "1:746812406976:web:110a4c6406f67140b34125",
+  measurementId: import.meta.env?.VITE_FIREBASE_MEASUREMENT_ID || "G-QWHJM4S6NX"
 };
 
 // Initialize Firebase

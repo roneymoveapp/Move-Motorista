@@ -21,11 +21,9 @@
       }
     </script>
     
-    <!-- Firebase SDKs - Temporarily disabled for debugging -->
-    <!--
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
-    -->
 
   <script type="importmap">
 {
@@ -85,8 +83,6 @@
     width: 100%;
   }
 </style>
-    <!-- Script da API do Google Maps adicionado diretamente para depuração -->
-    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg&libraries=places,directions"></script>
 </head>
   <body>
     <div class="smartphone">
@@ -94,9 +90,9 @@
         <div id="root"></div>
       </div>
     </div>
-    <!--
+    
     <script>
-      // Service Worker registration for Firebase Messaging - Temporarily disabled for debugging
+      // Service Worker registration for Firebase Messaging
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/firebase-messaging-sw.js')
           .then((registration) => {
@@ -106,6 +102,6 @@
           });
       }
     </script>
-    -->
+    
   </body>
 </html>
