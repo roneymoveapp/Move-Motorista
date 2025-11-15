@@ -1,16 +1,32 @@
-// Safely access Vite environment variables
-const env = (typeof import.meta !== 'undefined' && (import.meta as any).env) ? (import.meta as any).env : {};
+// FIX: Added a triple-slash directive to include Vite's client types, which defines `import.meta.env` and resolves TypeScript errors.
+/// <reference types="vite/client" />
+
+// AVISO IMPORTANTE: A sintaxe foi simplificada para ser compatível com o processo de build do Vite.
+// Vite substitui estaticamente `import.meta.env.VITE_*` durante o build.
+// A lógica `|| 'fallback'` garante que o app funcione em ambientes de desenvolvimento/preview
+// onde as variáveis de ambiente do Netlify não estão presentes.
 
 // --- DADOS DE CONEXÃO SUPABASE ---
-// As chaves são lidas das Variáveis de Ambiente configuradas no Netlify.
-// Caso não encontre (em ambiente de desenvolvimento/preview), usa as chaves locais como fallback.
-export const SUPABASE_URL = env.VITE_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
-export const SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
 
 // --- CHAVE DA API DO GOOGLE MAPS ---
-export const GOOGLE_MAPS_API_KEY = env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg';
+export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg';
 
-// FIX: Added DRIVER_ICON_URL to be used in the MapComponent as it was missing.
+// --- CONFIGURAÇÃO DO FIREBASE ---
+export const FIREBASE_CONFIG = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "app-move-motorista.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "app-move-motorista",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "app-move-motorista.appspot.com",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "746812406976",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:746812406976:web:110a4c6406f67140b34125",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-QWHJM4S6NX"
+};
+
+export const FIREBASE_VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BGOqXrVsgHWYVprxOpHZ8qixMH-ijAiZuCCgx1B-B_4-WWvObokPs7GBY6ve8lmXvki2B7DtWSRMOHcWDj3TnqQ';
+
+
 // --- ÍCONE DO MOTORISTA NO MAPA ---
 // Um SVG em formato data URI para evitar a necessidade de um arquivo de imagem separado.
 // O ícone é um carro, e a cor de preenchimento (#4FD1C5) corresponde à cor 'brand-accent' usada em outros lugares.
