@@ -2,20 +2,24 @@
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js");
 
-// AVISO IMPORTANTE: Esta configuração DEVE ser idêntica à do seu arquivo constants.ts.
-// Substitua pelos dados do seu projeto Firebase.
+// AVISO IMPORTANTE: As configurações do Firebase agora são injetadas
+// pelo processo de build do Vite, lendo as variáveis de ambiente (VITE_*).
+// Isso garante que as chaves não fiquem expostas diretamente no código-fonte.
+
 const firebaseConfig = {
-  apiKey: "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
-  authDomain: "app-move-motorista.firebaseapp.com",
-  projectId: "app-move-motorista",
-  storageBucket: "app-move-motorista.firebasestorage.app",
-  messagingSenderId: "746812406976",
-  appId: "1:746812406976:web:110a4c6406f67140b34125",
-  measurementId: "G-QWHJM4S6NX"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
 // Retrieve an instance of Firebase Messaging so that it can handle background messages.
 const messaging = firebase.messaging();

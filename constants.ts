@@ -1,16 +1,13 @@
-// IMPORTANT: In a real production app, these should be environment variables.
-// For this AI Studio project, we are hardcoding them as requested.
+/// <reference types="vite/client" />
 
 // --- DADOS DE CONEXÃO SUPABASE ---
-// Estes são os dados de conexão para o seu projeto.
-export const SUPABASE_URL = 'https://nnubisajpuxyubqyeupg.supabase.co';
-export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
+// As chaves são lidas das Variáveis de Ambiente configuradas no Netlify.
+// Isso evita que chaves secretas sejam expostas no código.
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // --- CHAVE DA API DO GOOGLE MAPS ---
-// AVISO: A chave da API do Google Maps deve ser configurada aqui.
-// O hook `useJsApiLoader` usado nos componentes de mapa requer que a chave
-// seja fornecida via código para carregar a API do Google Maps corretamente.
-export const GOOGLE_MAPS_API_KEY = 'AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg';
+export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 
 // --- CONFIGURAÇÕES DE NEGÓCIO ---
@@ -22,18 +19,16 @@ export const DRIVER_ICON_URL = `data:image/svg+xml;utf8,<svg xmlns="http://www.w
 
 
 // --- CONFIGURAÇÕES DO FIREBASE ---
-// AVISO: Substitua estes valores pelos dados do seu projeto Firebase.
-// Você encontra em: Configurações do Projeto > Geral > Seus apps > Configuração do SDK
+// Lendo a configuração do Firebase das variáveis de ambiente.
 export const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
-  authDomain: "app-move-motorista.firebaseapp.com",
-  projectId: "app-move-motorista",
-  storageBucket: "app-move-motorista.firebasestorage.app",
-  messagingSenderId: "746812406976",
-  appId: "1:746812406976:web:110a4c6406f67140b34125",
-  measurementId: "G-QWHJM4S6NX"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// AVISO: Substitua pela sua VAPID Key gerada no Firebase
-// Você encontra em: Configurações do Projeto > Cloud Messaging > Certificados push da Web
-export const FIREBASE_VAPID_KEY = 'BGdqXrVsqHWYVprxOpHZ8qjxMf-jAiZJCCgx1B18-4-w37mObc5oe7G7FdfbIImqu2B7DWSRM0HcWDJ3TngQ';
+// VAPID Key para notificações push.
+export const FIREBASE_VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
