@@ -1,5 +1,5 @@
-// FIX: Pinned the Supabase/Deno type definition to a specific version to resolve 'Cannot find type definition file' and 'Cannot find name Deno' errors.
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
+// FIX: Removed invalid type reference and declared Deno for non-Deno environments.
+declare const Deno: any;
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
