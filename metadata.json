@@ -1,0 +1,7 @@
+{
+  "name": "App Motorista",
+  "description": "Aplicativo para motoristas receberem e gerenciarem corridas em tempo real com rastreamento de localização, integrado ao Supabase e Google Maps.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

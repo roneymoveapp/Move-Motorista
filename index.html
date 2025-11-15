@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App Motorista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-primary': '#1A202C',
+              'brand-secondary': '#2D3748',
+              'brand-accent': '#4FD1C5',
+              'brand-light': '#A0AEC0',
+            }
+          }
+        }
+      }
+    </script>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg&libraries=places,directions" async></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.78.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@react-google-maps/api": "https://aistudiocdn.com/@react-google-maps/api@^2.20.7"
+  }
+}
+</script>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #333; /* A slightly lighter background to see the phone */
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+  }
+  .smartphone {
+    position: relative;
+    width: 375px;
+    height: 812px;
+    border: 16px solid black;
+    border-radius: 36px;
+    background: #1A202C; /* Match the app's primary background */
+    box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+  }
+  .smartphone:before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 30px;
+    background: #000;
+    border-radius: 0 0 20px 20px;
+    z-index: 2;
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px; /* Inner radius for the screen */
+    overflow: hidden;
+    position: relative;
+    background: #1A202C;
+  }
+  #root {
+    height: 100%;
+    width: 100%;
+  }
+</style>
+</head>
+  <body>
+    <div class="smartphone">
+      <div class="screen">
+        <div id="root"></div>
+      </div>
+    </div>
+    <script>
+      // Service Worker registration for Firebase Messaging
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then((registration) => {
+            console.log('Firebase Service Worker registered with scope:', registration.scope);
+          }).catch((err) => {
+            console.error('Service Worker registration failed:', err);
+          });
+      }
+    </script>
+  </body>
+</html>
