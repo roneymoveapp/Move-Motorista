@@ -13,7 +13,7 @@ import { ProfileModal } from './ProfileModal';
 import { VehicleDetailsModal } from './VehicleDetailsModal';
 import { FareEstimatorModal } from './FareEstimatorModal';
 import { type Ride, type DriverProfile, DriverStatus, type LatLng, RideStatus } from '../types';
-import { FIREBASE_CONFIG, FIREBASE_VAPID_KEY } from '../constants';
+// import { FIREBASE_CONFIG, FIREBASE_VAPID_KEY } from '../constants'; // Temporarily removed for debugging
 
 // Declare firebase on window
 declare global {
@@ -143,7 +143,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     }
   }, [showPayoutsOnMount]);
 
-  // Effect for Push Notifications
+  // Effect for Push Notifications - TEMPORARILY DISABLED FOR DEBUGGING
+  /*
   useEffect(() => {
     const setupFcm = async () => {
       // @ts-ignore
@@ -183,6 +184,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
       setupFcm();
     }
   }, [notificationPermissionStatus, session.user.id]);
+  */
 
   // Effect for Welcome Message
   useEffect(() => {
