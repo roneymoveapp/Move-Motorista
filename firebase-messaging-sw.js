@@ -2,8 +2,10 @@
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js");
 
-// Fallback configuration in case the query parameter is not passed.
-const fallbackConfig = {
+// This configuration must be available to the service worker.
+// Since service workers run in a different context, they can't access `window` or
+// variables from the main app script. Hardcoding it here is a common approach.
+const firebaseConfig = {
   apiKey: "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
   authDomain: "app-move-motorista.firebaseapp.com",
   projectId: "app-move-motorista",
@@ -12,26 +14,6 @@ const fallbackConfig = {
   appId: "1:746812406976:web:110a4c6406f67140b34125",
   measurementId: "G-QWHJM4S6NX"
 };
-
-// The configuration is passed from the main app via a URL query parameter.
-// This is the recommended way for Vite projects to provide env variables to a service worker.
-const params = new URL(location).searchParams;
-const encodedConfig = params.get('firebaseConfig');
-
-let firebaseConfig;
-
-if (encodedConfig) {
-    try {
-        firebaseConfig = JSON.parse(decodeURIComponent(encodedConfig));
-    } catch (e) {
-        console.error("Failed to parse firebase config from URL, using fallback.", e);
-        firebaseConfig = fallbackConfig;
-    }
-} else {
-    console.warn("Firebase config not found in URL, using fallback.");
-    firebaseConfig = fallbackConfig;
-}
-
 
 // Initialize Firebase
 if (!firebase.apps.length) {

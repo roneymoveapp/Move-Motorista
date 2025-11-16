@@ -27,33 +27,6 @@ const App: React.FC = () => {
     setIsDriverOnboarded(!!data);
   };
   
-  // Effect to register the Firebase service worker
-  useEffect(() => {
-      if ('serviceWorker' in navigator) {
-        // These variables are replaced by Vite during the build process.
-        const firebaseConfig = {
-          apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY,
-          authDomain: (import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN,
-          projectId: (import.meta as any).env.VITE_FIREBASE_PROJECT_ID,
-          storageBucket: (import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET,
-          messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-          appId: (import.meta as any).env.VITE_FIREBASE_APP_ID,
-          measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID
-        };
-    
-        // We encode the config object as a query parameter to pass it to the service worker.
-        const encodedConfig = encodeURIComponent(JSON.stringify(firebaseConfig));
-        const swUrl = `/firebase-messaging-sw.js?firebaseConfig=${encodedConfig}`;
-    
-        navigator.serviceWorker.register(swUrl)
-          .then((registration) => {
-            console.log('Firebase Service Worker registered with scope:', registration.scope);
-          }).catch((err) => {
-            console.error('Service Worker registration failed:', err);
-          });
-      }
-  }, []);
-
   useEffect(() => {
     // This effect uses getSession() for the initial check and onAuthStateChange for live updates.
     // This avoids the flicker issue where the login screen might show before the session is loaded.
