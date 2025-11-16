@@ -1,36 +1,33 @@
-// FIX: Manually define types for process.env for TypeScript compatibility
-// in environments where Node.js types might not be available. Build tools
-// like Create React App are expected to handle these variables.
-declare const process: {
-  env: {
-    [key: string]: string | undefined;
-  }
-};
-
-
-// AVISO IMPORTANTE: A sintaxe foi atualizada para usar "process.env"
-// Isso garante que o código funcione no ambiente do Netlify e outros
-// sistemas de build padrão de React que usam variáveis de ambiente.
+// AVISO IMPORTANTE: A sintaxe foi atualizada para usar "import.meta.env"
+// que é o padrão para projetos Vite como este. Isso garante que o código
+// funcione no ambiente do Netlify e outros sistemas de build.
+// LEMBRE-SE: Você DEVE renomear suas variáveis no painel do Netlify
+// de REACT_APP_... para VITE_...
 
 // --- DADOS DE CONEXÃO SUPABASE ---
-export const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
-export const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
+// FIX: Cast `import.meta` to `any` to resolve TypeScript error about missing `env` property.
+export const SUPABASE_URL = (import.meta as any).env.VITE_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
+// FIX: Cast `import.meta` to `any` to resolve TypeScript error about missing `env` property.
+export const SUPABASE_ANON_KEY = (import.meta as any).env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
 
 // --- CHAVE DA API DO GOOGLE MAPS ---
-export const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg';
+// FIX: Cast `import.meta` to `any` to resolve TypeScript error about missing `env` property.
+export const GOOGLE_MAPS_API_KEY = (import.meta as any).env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg';
 
 // --- CONFIGURAÇÃO DO FIREBASE ---
+// FIX: Cast `import.meta` to `any` to resolve TypeScript errors about the missing `env` property.
 export const FIREBASE_CONFIG = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "app-move-motorista.firebaseapp.com",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "app-move-motorista",
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "app-move-motorista.appspot.com",
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "746812406976",
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:746812406976:web:110a4c6406f67140b34125",
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-QWHJM4S6NX"
+  apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY || "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
+  authDomain: (import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN || "app-move-motorista.firebaseapp.com",
+  projectId: (import.meta as any).env.VITE_FIREBASE_PROJECT_ID || "app-move-motorista",
+  storageBucket: (import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET || "app-move-motorista.appspot.com",
+  messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID || "746812406976",
+  appId: (import.meta as any).env.VITE_FIREBASE_APP_ID || "1:746812406976:web:110a4c6406f67140b34125",
+  measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID || "G-QWHJM4S6NX"
 };
 
-export const FIREBASE_VAPID_KEY = process.env.REACT_APP_FIREBASE_VAPID_KEY || 'BGOqXrVsgHWYVprxOpHZ8qixMH-ijAiZuCCgx1B-B_4-WWvObokPs7GBY6ve8lmXvki2B7DtWSRMOHcWDj3TnqQ';
+// FIX: Cast `import.meta` to `any` to resolve TypeScript error about missing `env` property.
+export const FIREBASE_VAPID_KEY = (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BGOqXrVsgHWYVprxOpHZ8qixMH-ijAiZuCCgx1B-B_4-WWvObokPs7GBY6ve8lmXvki2B7DtWSRMOHcWDj3TnqQ';
 
 
 // --- ÍCONE DO MOTORISTA NO MAPA ---
