@@ -28,39 +28,27 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    // This effect uses getSession() for the initial check and onAuthStateChange for live updates.
-    // This avoids the flicker issue where the login screen might show before the session is loaded.
-    const initializeSession = async () => {
-      try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        
-        setSession(initialSession);
-        if (initialSession) {
-            await checkDriverStatus(initialSession.user.id);
-        }
-      } catch (error) {
-        console.error("Error during session initialization:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeSession();
+    // This robust effect relies solely on onAuthStateChange.
+    // It fires immediately on load with the current session state ('INITIAL_SESSION')
+    // and continues to listen for changes like SIGN_IN or SIGN_OUT.
+    // This prevents race conditions and the "stuck on loading" bug.
+    setLoading(true);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
       if (newSession) {
         try {
-          // A user has logged in or the session was refreshed.
           await checkDriverStatus(newSession.user.id);
         } catch (checkError) {
             console.error("Error checking driver status on auth state change:", checkError);
         }
       } else {
-        // The user has logged out.
+        // The user has logged out or has no session.
         setIsDriverOnboarded(false);
-        setShowDashboardOverride(false); // Reset on logout
+        setShowDashboardOverride(false);
       }
+      // This will be called after the initial session is checked and after any auth event.
+      setLoading(false);
     });
 
     // Cleanup the subscription when the component unmounts.

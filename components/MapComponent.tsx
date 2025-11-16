@@ -186,19 +186,19 @@ export const MapComponent: React.FC<MapComponentProps> = ({ driverLocation, curr
   if (loadError) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-red-900 text-white p-4 text-center">
-        <h2 className="text-lg font-bold mb-2">Erro ao carregar o mapa</h2>
+        <h2 className="text-xl font-bold mb-2">Falha ao carregar o mapa</h2>
         <p className="mb-4">
-            Isso geralmente acontece porque a chave de API do Google Maps é inválida ou não está configurada corretamente.
-            <br />
-            <strong className="my-2 block">Por favor, verifique a chave de API no arquivo <code>constants.ts</code>.</strong>
+            Este erro é uma medida de segurança do Google. Para resolver, você precisa autorizar o seu site no painel do Google Cloud.
         </p>
-        <div className="text-left text-sm bg-red-800 p-3 rounded-md">
-          <p className="font-semibold mb-2">Para corrigir, verifique no seu projeto Google Cloud:</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>A "Maps JavaScript API" está ativada.</li>
-            <li>A chave não possui restrições de referenciador HTTP que bloqueiem este app.</li>
-            <li>A chave está associada a uma conta de faturamento.</li>
-          </ul>
+        <div className="text-left text-sm bg-red-800 p-3 rounded-md w-full max-w-md">
+          <p className="font-bold mb-2">Siga estes passos para corrigir:</p>
+          <ol className="list-decimal list-inside space-y-2">
+            <li>Acesse o painel do <strong>Google Cloud</strong> e vá para <strong>"APIs e Serviços" &gt; "Credenciais"</strong>.</li>
+            <li>Clique na sua chave de API do Google Maps.</li>
+            <li>Em <strong>"Restrições de aplicativo"</strong>, selecione <strong>"Referenciadores HTTP"</strong>.</li>
+            <li>Clique em <strong>"Adicionar"</strong> e insira o endereço do seu site: <code className="bg-black px-1 rounded">*.vercel.app</code></li>
+            <li>Clique em <strong>"Salvar"</strong>. Pode levar alguns minutos para atualizar.</li>
+          </ol>
         </div>
          <button 
             onClick={() => window.location.reload()} 
