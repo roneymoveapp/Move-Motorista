@@ -2,25 +2,35 @@
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js");
 
-// AVISO IMPORTANTE: A sintaxe foi atualizada para usar variáveis de ambiente
-// no padrão do Create React App (REACT_APP_*). O processo de build
-// (ex: no Netlify) deve substituir essas variáveis pelos valores reais.
-// Se `process` não for definido em tempo de execução, os valores de fallback serão usados.
-
-// NOTE: The `process.env` variables below are intended to be replaced by a build tool
-// (like Create React App/Netlify's build process) with static string values.
-// The `typeof process` check is a runtime safeguard in case the build substitution fails,
-// preventing a "process is not defined" error in the browser.
-
-const firebaseConfig = {
-  apiKey: (typeof process !== 'undefined' ? process.env.REACT_APP_FIREBASE_API_KEY : undefined) || "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
-  authDomain: (typeof process !== 'undefined' ? process.env.REACT_APP_FIREBASE_AUTH_DOMAIN : undefined) || "app-move-motorista.firebaseapp.com",
-  projectId: (typeof process !== 'undefined' ? process.env.REACT_APP_FIREBASE_PROJECT_ID : undefined) || "app-move-motorista",
-  storageBucket: (typeof process !== 'undefined' ? process.env.REACT_APP_FIREBASE_STORAGE_BUCKET : undefined) || "app-move-motorista.appspot.com",
-  messagingSenderId: (typeof process !== 'undefined' ? process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID : undefined) || "746812406976",
-  appId: (typeof process !== 'undefined' ? process.env.REACT_APP_FIREBASE_APP_ID : undefined) || "1:746812406976:web:110a4c6406f67140b34125",
-  measurementId: (typeof process !== 'undefined' ? process.env.REACT_APP_FIREBASE_MEASUREMENT_ID : undefined) || "G-QWHJM4S6NX"
+// Fallback configuration in case the query parameter is not passed.
+const fallbackConfig = {
+  apiKey: "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
+  authDomain: "app-move-motorista.firebaseapp.com",
+  projectId: "app-move-motorista",
+  storageBucket: "app-move-motorista.appspot.com",
+  messagingSenderId: "746812406976",
+  appId: "1:746812406976:web:110a4c6406f67140b34125",
+  measurementId: "G-QWHJM4S6NX"
 };
+
+// The configuration is passed from the main app via a URL query parameter.
+// This is the recommended way for Vite projects to provide env variables to a service worker.
+const params = new URL(location).searchParams;
+const encodedConfig = params.get('firebaseConfig');
+
+let firebaseConfig;
+
+if (encodedConfig) {
+    try {
+        firebaseConfig = JSON.parse(decodeURIComponent(encodedConfig));
+    } catch (e) {
+        console.error("Failed to parse firebase config from URL, using fallback.", e);
+        firebaseConfig = fallbackConfig;
+    }
+} else {
+    console.warn("Firebase config not found in URL, using fallback.");
+    firebaseConfig = fallbackConfig;
+}
 
 
 // Initialize Firebase

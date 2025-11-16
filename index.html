@@ -91,10 +91,25 @@
       </div>
     </div>
     
-    <script>
+    <script type="module">
       // Service Worker registration for Firebase Messaging
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        // These variables are replaced by Vite during the build process.
+        const firebaseConfig = {
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+          appId: import.meta.env.VITE_FIREBASE_APP_ID,
+          measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+        };
+    
+        // We encode the config object as a query parameter to pass it to the service worker.
+        const encodedConfig = encodeURIComponent(JSON.stringify(firebaseConfig));
+        const swUrl = `/firebase-messaging-sw.js?firebaseConfig=${encodedConfig}`;
+    
+        navigator.serviceWorker.register(swUrl)
           .then((registration) => {
             console.log('Firebase Service Worker registered with scope:', registration.scope);
           }).catch((err) => {
