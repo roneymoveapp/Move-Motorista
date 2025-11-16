@@ -42,26 +42,17 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: transparent; /* Changed to allow map to show */
+    background-color: #2D3748; /* App background color */
   }
   body {
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: sans-serif;
-    overflow: hidden; /* Prevent scrollbars from the map */
-  }
-  #map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0; /* Background layer */
+    overflow: hidden;
   }
   .smartphone {
     position: relative;
-    z-index: 1; /* Ensure smartphone is above the map */
     width: 375px;
     height: 812px;
     border: 16px solid black;
@@ -89,26 +80,37 @@
     position: relative;
     background: #1A202C;
   }
+  #map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
   #root {
     height: 100%;
     width: 100%;
+    position: relative;
+    z-index: 1;
+    background-color: transparent; /* Allows map background to be seen initially */
   }
 </style>
 </head>
   <body>
-    <div id="map"></div>
     <div class="smartphone">
       <div class="screen">
+        <div id="map"></div>
         <div id="root"></div>
       </div>
     </div>
     <script type="module" src="/index.tsx"></script>
-
+    
     <script>
       function initMap() {
         const mapOptions = {
-          center: { lat: -23.55052, lng: -46.633308 }, // Default to São Paulo
-          zoom: 12,
+          center: { lat: -23.55052, lng: -46.633308 }, // São Paulo
+          zoom: 14,
           disableDefaultUI: true,
           styles: [
             { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
@@ -129,12 +131,11 @@
             { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
             { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
             { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
-          ],
+          ]
         };
-        new google.maps.Map(document.getElementById('map'), mapOptions);
+        new google.maps.Map(document.getElementById("map"), mapOptions);
       }
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg&callback=initMap"></script>
-    
   </body>
 </html>
