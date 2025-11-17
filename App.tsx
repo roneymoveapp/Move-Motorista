@@ -28,30 +28,33 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    // This robust effect relies solely on onAuthStateChange.
-    // It fires immediately on load with the current session state ('INITIAL_SESSION')
-    // and continues to listen for changes like SIGN_IN or SIGN_OUT.
-    // This prevents race conditions and the "stuck on loading" bug.
+    // Este efeito foi refatorado para ser mais robusto.
+    // Ele primeiro busca explicitamente a sessão atual para garantir que o aplicativo não
+    // fique preso na tela de carregamento. Em seguida, ele configura um ouvinte para quaisquer
+    // futuras alterações de autenticação (como login ou logout).
     setLoading(true);
 
+    // 1. Busca o estado inicial da sessão
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        await checkDriverStatus(session.user.id);
+      }
+      setLoading(false); // Isso garante que a tela de carregamento seja removida.
+    });
+
+    // 2. Configura um ouvinte para futuras alterações de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
       if (newSession) {
-        try {
-          await checkDriverStatus(newSession.user.id);
-        } catch (checkError) {
-            console.error("Error checking driver status on auth state change:", checkError);
-        }
+        await checkDriverStatus(newSession.user.id);
       } else {
-        // The user has logged out or has no session.
         setIsDriverOnboarded(false);
         setShowDashboardOverride(false);
       }
-      // This will be called after the initial session is checked and after any auth event.
-      setLoading(false);
     });
 
-    // Cleanup the subscription when the component unmounts.
+    // Limpa a inscrição quando o componente é desmontado
     return () => {
       subscription?.unsubscribe();
     };
