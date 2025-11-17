@@ -4,15 +4,14 @@ importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compa
 
 // This configuration must be available to the service worker.
 // Since service workers run in a different context, they can't access `window` or
-// variables from the main app script. Hardcoding it here is a common approach.
+// variables from the main app script. We use environment variables injected at build time.
 const firebaseConfig = {
-  apiKey: "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
-  authDomain: "app-move-motorista.firebaseapp.com",
-  projectId: "app-move-motorista",
-  storageBucket: "app-move-motorista.appspot.com",
-  messagingSenderId: "746812406976",
-  appId: "1:746812406976:web:110a4c6406f67140b34125",
-  measurementId: "G-QWHJM4S6NX"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase

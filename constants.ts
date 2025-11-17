@@ -1,31 +1,31 @@
+/// <reference types="vite/client" />
 
 // --- DADOS DE CONEXÃO SUPABASE ---
 // Estes valores são públicos e seguros de serem expostos no lado do cliente,
 // pois a segurança é garantida pelas Row Level Security (RLS) policies do Supabase.
-export const SUPABASE_URL = 'https://nnubisajpuxyubqyeupg.supabase.co';
-export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // --- CHAVE DA API DO GOOGLE MAPS ---
 // Esta chave também é segura para exposição no lado do cliente.
 // É recomendado configurar restrições de referenciador HTTP no painel do Google Cloud
 // para garantir que a chave só possa ser usada pelo domínio do seu aplicativo.
-export const GOOGLE_MAPS_API_KEY = 'AIzaSyDJiVA-PfYrE3dgKsKhyRzF3CedJWeQKrg';
+export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 // --- CONFIGURAÇÃO DO FIREBASE ---
 // Esta configuração é para o SDK do cliente do Firebase e é segura para ser pública.
 export const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCTwvoS5pM-f-9qZ8gQgg727OXHpjdoLmg",
-  authDomain: "app-move-motorista.firebaseapp.com",
-  projectId: "app-move-motorista",
-  storageBucket: "app-move-motorista.appspot.com",
-  messagingSenderId: "746812406976",
-  appId: "1:746812406976:web:110a4c6406f67140b34125",
-  measurementId: "G-QWHJM4S6NX"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // --- CHAVE VAPID DO FIREBASE MESSAGING ---
 // Esta chave é usada para identificar seu aplicativo ao enviar notificações push. É segura para ser pública.
-export const FIREBASE_VAPID_KEY = 'BGOqXrVsgHWYVprxOpHZ8qixMH-ijAiZuCCgx1B-B_4-WWvObokPs7GBY6ve8lmXvki2B7DtWSRMOHcWDj3TnqQ';
+export const FIREBASE_VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
 
 // --- ÍCONE DO MOTORISTA NO MAPA ---
