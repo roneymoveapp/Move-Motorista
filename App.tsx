@@ -35,6 +35,13 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
+    // Register Service Worker for Firebase Messaging
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(registration => console.log('Service Worker registrado:', registration))
+        .catch(err => console.error('Erro ao registrar SW:', err));
+    }
+
     if (!supabase) {
       setAppError("Falha na conexão com o servidor. Por favor, recarregue a página.");
       setLoading(false);
