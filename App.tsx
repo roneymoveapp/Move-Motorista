@@ -28,35 +28,44 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    // Este efeito foi refatorado para ser mais robusto.
-    // Ele primeiro busca explicitamente a sessão atual para garantir que o aplicativo não
-    // fique preso na tela de carregamento. Em seguida, ele configura um ouvinte para quaisquer
-    // futuras alterações de autenticação (como login ou logout).
-    setLoading(true);
+    // A verificação da sessão foi encapsulada em uma função async com tratamento de erros
+    // robusto para garantir que o app nunca fique preso na tela de carregamento.
+    const checkSession = async () => {
+        setLoading(true);
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) throw error;
+            
+            setSession(session);
+            if (session) {
+                await checkDriverStatus(session.user.id);
+            }
+        } catch (error) {
+            console.error("Erro ao verificar a sessão:", error);
+            // Em caso de erro, o usuário verá a tela de login, o que é um fallback seguro.
+        } finally {
+            setLoading(false); // Garante que o carregamento sempre termine.
+        }
+    };
 
-    // 1. Busca o estado inicial da sessão
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        await checkDriverStatus(session.user.id);
-      }
-      setLoading(false); // Isso garante que a tela de carregamento seja removida.
-    });
+    checkSession();
 
-    // 2. Configura um ouvinte para futuras alterações de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      setSession(newSession);
-      if (newSession) {
-        await checkDriverStatus(newSession.user.id);
-      } else {
-        setIsDriverOnboarded(false);
-        setShowDashboardOverride(false);
-      }
+        setSession(newSession);
+        if (newSession) {
+            try {
+                await checkDriverStatus(newSession.user.id);
+            } catch (error) {
+                console.error("Erro ao verificar status do motorista na mudança de autenticação:", error);
+            }
+        } else {
+            setIsDriverOnboarded(false);
+            setShowDashboardOverride(false);
+        }
     });
 
-    // Limpa a inscrição quando o componente é desmontado
     return () => {
-      subscription?.unsubscribe();
+        subscription?.unsubscribe();
     };
   }, []);
   
