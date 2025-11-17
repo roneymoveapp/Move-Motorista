@@ -28,28 +28,12 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
-    // A verificação da sessão foi encapsulada em uma função async com tratamento de erros
-    // robusto para garantir que o app nunca fique preso na tela de carregamento.
-    const checkSession = async () => {
-        setLoading(true);
-        try {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) throw error;
-            
-            setSession(session);
-            if (session) {
-                await checkDriverStatus(session.user.id);
-            }
-        } catch (error) {
-            console.error("Erro ao verificar a sessão:", error);
-            // Em caso de erro, o usuário verá a tela de login, o que é um fallback seguro.
-        } finally {
-            setLoading(false); // Garante que o carregamento sempre termine.
-        }
-    };
+    setLoading(true);
 
-    checkSession();
-
+    // A abordagem mais robusta é confiar exclusivamente no onAuthStateChange.
+    // Ele é garantido de ser disparado na inicialização do app com o estado da sessão.
+    // Isso evita condições de corrida e travamentos que podem ocorrer ao chamar getSession()
+    // separadamente em ambientes de produção como a Vercel.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
         setSession(newSession);
         if (newSession) {
@@ -62,6 +46,8 @@ const App: React.FC = () => {
             setIsDriverOnboarded(false);
             setShowDashboardOverride(false);
         }
+        // Garante que o carregamento termine SOMENTE APÓS a verificação de auth ser concluída.
+        setLoading(false);
     });
 
     return () => {
