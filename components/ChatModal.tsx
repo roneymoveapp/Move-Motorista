@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../services/supabaseClient';
 import type { Ride, ChatMessage } from '../types';
-import type { Session } from '@supabase/supabase-js';
+// FIX: The `Session` type is now exported from `@supabase/auth-js`.
+import type { Session } from '@supabase/auth-js';
 
 interface ChatModalProps {
   ride: Ride;

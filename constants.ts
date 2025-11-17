@@ -1,31 +1,51 @@
-/// <reference types="vite/client" />
+// FIX: Manually define the types for Vite environment variables to resolve TypeScript errors
+// when the 'vite/client' type definitions are not automatically picked up.
+interface ImportMetaEnv {
+  readonly VITE_SUPABASE_URL: string;
+  readonly VITE_SUPABASE_ANON_KEY: string;
+  readonly VITE_GOOGLE_MAPS_API_KEY: string;
+  readonly VITE_FIREBASE_API_KEY: string;
+  readonly VITE_FIREBASE_AUTH_DOMAIN: string;
+  readonly VITE_FIREBASE_PROJECT_ID: string;
+  readonly VITE_FIREBASE_STORAGE_BUCKET: string;
+  readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string;
+  readonly VITE_FIREBASE_APP_ID: string;
+  readonly VITE_FIREBASE_VAPID_KEY: string;
+}
+
+// FIX: Correctly extend the global `ImportMeta` interface to include Vite's `env` property, resolving TypeScript errors about `import.meta.env` not being defined. This ensures type safety for environment variables throughout the application.
+declare global {
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
+}
 
 // --- DADOS DE CONEXÃO SUPABASE ---
 // Estes valores são públicos e seguros de serem expostos no lado do cliente,
 // pois a segurança é garantida pelas Row Level Security (RLS) policies do Supabase.
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export const SUPABASE_URL = import.meta.env?.VITE_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
+export const SUPABASE_ANON_KEY = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTgxMDQ3MDgsImV4cCI6MjAzMzY4MDcwOH0.YJ7A-i-Qp1Dk5M25k2a-sbilin_M352T22XP5vrpD-s';
 
 // --- CHAVE DA API DO GOOGLE MAPS ---
 // Esta chave também é segura para exposição no lado do cliente.
 // É recomendado configurar restrições de referenciador HTTP no painel do Google Cloud
 // para garantir que a chave só possa ser usada pelo domínio do seu aplicativo.
-export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+export const GOOGLE_MAPS_API_KEY = import.meta.env?.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY_HERE'; // Substitua pela sua chave
 
 // --- CONFIGURAÇÃO DO FIREBASE ---
 // Esta configuração é para o SDK do cliente do Firebase e é segura para ser pública.
 export const FIREBASE_CONFIG = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env?.VITE_FIREBASE_API_KEY || "YOUR_API_KEY_HERE",
+  authDomain: import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN_HERE",
+  projectId: import.meta.env?.VITE_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID_HERE",
+  storageBucket: import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_SENDER_ID_HERE",
+  appId: import.meta.env?.VITE_FIREBASE_APP_ID || "YOUR_APP_ID_HERE",
 };
 
 // --- CHAVE VAPID DO FIREBASE MESSAGING ---
 // Esta chave é usada para identificar seu aplicativo ao enviar notificações push. É segura para ser pública.
-export const FIREBASE_VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+export const FIREBASE_VAPID_KEY = import.meta.env?.VITE_FIREBASE_VAPID_KEY || 'YOUR_FIREBASE_VAPID_KEY_HERE';
 
 
 // --- ÍCONE DO MOTORISTA NO MAPA ---

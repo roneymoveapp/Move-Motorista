@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import type { Session } from '@supabase/supabase-js';
+// FIX: The `Session` type is now exported from `@supabase/auth-js`.
+import type { Session } from '@supabase/auth-js';
 import { supabase } from '../services/supabaseClient';
 import { MapComponent } from './MapComponent';
 import { RideRequestModal } from './RideRequestModal';
@@ -151,8 +152,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
         return;
       }
       
-      if (!window.firebase.apps.length) {
-          window.firebase.initializeApp(FIREBASE_CONFIG);
+      // Adiciona uma verificação para garantir que a configuração do Firebase seja válida antes de inicializar.
+      if (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY_HERE') {
+        if (!window.firebase.apps.length) {
+            window.firebase.initializeApp(FIREBASE_CONFIG);
+        }
+      } else {
+        console.warn("A configuração do Firebase está incompleta. As notificações push não funcionarão.");
+        return; // Não prossegue com a configuração do FCM se as chaves não estiverem presentes.
       }
 
       const messaging = window.firebase.messaging();

@@ -1,18 +1,17 @@
-
-
-
 // FIX: Corrected import statement for useState and useEffect from React.
 import React, { useState, useEffect } from 'react';
 import { supabase } from './services/supabaseClient';
 import { Auth as AuthComponent } from './components/Auth';
 import { Dashboard } from './components/Dashboard';
-import type { Session } from '@supabase/supabase-js';
+// FIX: The `Session` type is now exported from `@supabase/auth-js`.
+import type { Session } from '@supabase/auth-js';
 
 const App: React.FC = () => {
   // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [session, setSession] = useState<Session | null>(null);
   // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [loading, setLoading] = useState(true);
+  const [appError, setAppError] = useState<string | null>(null);
   // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [isDriverOnboarded, setIsDriverOnboarded] = useState(false);
   // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
@@ -36,6 +35,12 @@ const App: React.FC = () => {
   };
   
   useEffect(() => {
+    if (!supabase) {
+      setAppError("Falha na conexão com o servidor. Por favor, recarregue a página.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     // Failsafe timeout: If auth state doesn't resolve in 5 seconds,
@@ -88,6 +93,17 @@ const App: React.FC = () => {
         setShowDashboardOverride(true);
     }
   };
+
+  if (appError) {
+    return (
+      <div className="flex items-center justify-center h-full bg-brand-primary p-4">
+        <div className="text-center">
+            <h2 className="text-xl text-red-400 font-bold mb-4">Erro Crítico</h2>
+            <p className="text-brand-light">{appError}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

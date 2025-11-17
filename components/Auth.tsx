@@ -1,8 +1,10 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
-import type { User } from '@supabase/supabase-js';
+// FIX: The `User` type is now exported from `@supabase/auth-js`.
+import type { User } from '@supabase/auth-js';
 
 type View = 'LOGIN' | 'SIGNUP_PROFILE' | 'SIGNUP_CONGRATS' | 'SIGNUP_VEHICLE' | 'SIGNUP_COMPLETE' | 'SIGNUP_PAYOUT' | 'FORGOT_PASSWORD';
 type PayoutView = 'CHOICE' | 'CARD_FORM' | 'PIX_FORM';

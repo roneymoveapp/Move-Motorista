@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import type { Ride } from '../types';
-import type { Session } from '@supabase/supabase-js';
+// FIX: The `Session` type is now exported from `@supabase/auth-js`.
+import type { Session } from '@supabase/auth-js';
 
 interface HistoryModalProps {
   session: Session;
@@ -17,7 +18,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ session, onClose }) 
     const fetchHistory = async () => {
       const { data, error } = await supabase
         .from('rides')
-        .select('id, created_at, from_location, to_location, final_price, estimated_price, payment_status')
+        .select('id, created_at, from_location, to_location, final_price, estimated_price, payment_status, status')
         .eq('driver_id', session.user.id)
         .in('status', ['COMPLETED', 'CANCELLED'])
         .order('created_at', { ascending: false });

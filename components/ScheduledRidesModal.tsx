@@ -1,10 +1,12 @@
 
 
 
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import type { ScheduledRide } from '../types';
-import type { Session } from '@supabase/supabase-js';
+// FIX: The `Session` type is now exported from `@supabase/auth-js`.
+import type { Session } from '@supabase/auth-js';
 
 interface ScheduledRidesModalProps {
   session: Session;
