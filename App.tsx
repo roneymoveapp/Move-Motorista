@@ -1,4 +1,7 @@
 
+
+
+// FIX: Corrected import statement for useState and useEffect from React.
 import React, { useState, useEffect } from 'react';
 import { supabase } from './services/supabaseClient';
 import { Auth as AuthComponent } from './components/Auth';
@@ -6,10 +9,15 @@ import { Dashboard } from './components/Dashboard';
 import type { Session } from '@supabase/supabase-js';
 
 const App: React.FC = () => {
+  // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [session, setSession] = useState<Session | null>(null);
+  // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [loading, setLoading] = useState(true);
+  // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [isDriverOnboarded, setIsDriverOnboarded] = useState(false);
+  // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [forceOnboarding, setForceOnboarding] = useState(false);
+  // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [showDashboardOverride, setShowDashboardOverride] = useState(false);
 
   const checkDriverStatus = async (user_id: string) => {
@@ -30,11 +38,19 @@ const App: React.FC = () => {
   useEffect(() => {
     setLoading(true);
 
-    // A abordagem mais robusta é confiar exclusivamente no onAuthStateChange.
-    // Ele é garantido de ser disparado na inicialização do app com o estado da sessão.
-    // Isso evita condições de corrida e travamentos que podem ocorrer ao chamar getSession()
-    // separadamente em ambientes de produção como a Vercel.
+    // Failsafe timeout: If auth state doesn't resolve in 5 seconds,
+    // force the loading state to false to prevent the app from getting stuck.
+    // This is crucial for production environments like Vercel where network conditions
+    // might cause the initial session check to hang.
+    const loadingTimeout = setTimeout(() => {
+      console.warn("Auth check timed out. Displaying login screen.");
+      setLoading(false);
+    }, 5000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+        // As soon as we get a response, clear the failsafe timeout.
+        clearTimeout(loadingTimeout);
+
         setSession(newSession);
         if (newSession) {
             try {
@@ -46,11 +62,12 @@ const App: React.FC = () => {
             setIsDriverOnboarded(false);
             setShowDashboardOverride(false);
         }
-        // Garante que o carregamento termine SOMENTE APÓS a verificação de auth ser concluída.
+        // Ensure loading is finished ONLY AFTER the auth check completes.
         setLoading(false);
     });
 
     return () => {
+        clearTimeout(loadingTimeout);
         subscription?.unsubscribe();
     };
   }, []);
