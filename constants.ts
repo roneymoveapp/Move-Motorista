@@ -1,3 +1,4 @@
+
 // FIX: Manually define the types for Vite environment variables to resolve TypeScript errors
 // when the 'vite/client' type definitions are not automatically picked up.
 interface ImportMetaEnv {
@@ -24,7 +25,7 @@ declare global {
 // Estes valores são públicos e seguros de serem expostos no lado do cliente,
 // pois a segurança é garantida pelas Row Level Security (RLS) policies do Supabase.
 export const SUPABASE_URL = import.meta.env?.VITE_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
-export const SUPABASE_ANON_KEY = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTgxMDQ3MDgsImV4cCI6MjAzMzY4MDcwOH0.YJ7A-i-Qp1Dk5M25k2a-sbilin_M352T22XP5vrpD-s';
+export const SUPABASE_ANON_KEY = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
 
 // --- CHAVE DA API DO GOOGLE MAPS ---
 // Esta chave também é segura para exposição no lado do cliente.
