@@ -60,12 +60,12 @@ const App: React.FC = () => {
     }, 5000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-        // As soon as we get a response, clear the failsafe timeout.
-        clearTimeout(loadingTimeout);
-
         setSession(newSession);
+        
         if (newSession) {
             try {
+                // We await this check. If it hangs due to RLS/Connection issues,
+                // the loadingTimeout (defined outside) will eventually trigger and free the UI.
                 await checkDriverStatus(newSession.user.id);
             } catch (error) {
                 console.error("Erro ao verificar status do motorista na mudança de autenticação:", error);
@@ -74,7 +74,10 @@ const App: React.FC = () => {
             setIsDriverOnboarded(false);
             setShowDashboardOverride(false);
         }
-        // Ensure loading is finished ONLY AFTER the auth check completes.
+        
+        // FIX: Only clear the timeout and stop loading AFTER all async checks are done.
+        // This ensures we don't get stuck in a 'loading' state if checkDriverStatus takes too long.
+        clearTimeout(loadingTimeout);
         setLoading(false);
     });
 
