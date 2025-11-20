@@ -24,29 +24,29 @@ declare global {
 // --- DADOS DE CONEXÃO SUPABASE ---
 // Estes valores são públicos e seguros de serem expostos no lado do cliente,
 // pois a segurança é garantida pelas Row Level Security (RLS) policies do Supabase.
-export const SUPABASE_URL = import.meta.env?.VITE_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
-export const SUPABASE_ANON_KEY = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://nnubisajpuxyubqyeupg.supabase.co';
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udWJpc2FqcHV4eXVicXlldXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjAxMzEsImV4cCI6MjA3NTczNjEzMX0.lUSkW4iWUpXobLkkczrPPAMHjCSJh4sv5dA5lzEEANg';
 
 // --- CHAVE DA API DO GOOGLE MAPS ---
 // Esta chave também é segura para exposição no lado do cliente.
 // É recomendado configurar restrições de referenciador HTTP no painel do Google Cloud
 // para garantir que a chave só possa ser usada pelo domínio do seu aplicativo.
-export const GOOGLE_MAPS_API_KEY = import.meta.env?.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY_HERE'; // Substitua pela sua chave
+export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY_HERE'; // Substitua pela sua chave
 
 // --- CONFIGURAÇÃO DO FIREBASE ---
 // Esta configuração é para o SDK do cliente do Firebase e é segura para ser pública.
 export const FIREBASE_CONFIG = {
-  apiKey: import.meta.env?.VITE_FIREBASE_API_KEY || "YOUR_API_KEY_HERE",
-  authDomain: import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN_HERE",
-  projectId: import.meta.env?.VITE_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID_HERE",
-  storageBucket: import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_SENDER_ID_HERE",
-  appId: import.meta.env?.VITE_FIREBASE_APP_ID || "YOUR_APP_ID_HERE",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "YOUR_API_KEY_HERE",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN_HERE",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID_HERE",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "YOUR_SENDER_ID_HERE",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "YOUR_APP_ID_HERE",
 };
 
 // --- CHAVE VAPID DO FIREBASE MESSAGING ---
 // Esta chave é usada para identificar seu aplicativo ao enviar notificações push. É segura para ser pública.
-export const FIREBASE_VAPID_KEY = import.meta.env?.VITE_FIREBASE_VAPID_KEY || 'YOUR_FIREBASE_VAPID_KEY_HERE';
+export const FIREBASE_VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || 'YOUR_FIREBASE_VAPID_KEY_HERE';
 
 
 // --- ÍCONE DO MOTORISTA NO MAPA ---
