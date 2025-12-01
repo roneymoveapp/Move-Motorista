@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 // FIX: The `Session` type is now exported from `@supabase/auth-js`.
 import type { Session } from '@supabase/auth-js';
@@ -43,6 +44,10 @@ const WalletIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4Z"/><path d="M4 6v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1-.9-2-2-2Z"/></svg>
 );
 
+const BellIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-brand-accent mb-4"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+);
+
 const getInitials = (name: string = ''): string => {
     if (!name) return '';
     return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
@@ -68,6 +73,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
   const [error, setError] = useState<string | null>(null);
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const [showOnboardingPrompt, setShowOnboardingPrompt] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
 
   const watchId = useRef<number | null>(null);
@@ -143,6 +149,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
         setShowPayoutDetails(true);
     }
   }, [showPayoutsOnMount]);
+
+  // Effect to check notification permission on mount removed per user request.
+  // The check is now done exclusively on the "Ficar Online" button.
 
   // Effect for Push Notifications
   useEffect(() => {
@@ -327,11 +336,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
   }, [session.user.id, fetchDriverProfile]);
 
   const handleToggleOnline = () => {
-    // If driver profile doesn't exist (vehicle data is missing), show the prompt modal.
+    // 1. STEP ONE: Notification Permission Check
+    // If not granted, we block the action and show the specific modal.
+    if (!driverProfile?.is_active && Notification.permission !== 'granted') {
+        setShowNotificationModal(true);
+        return;
+    }
+
+    // 2. STEP TWO: Onboarding/Vehicle Data Check
+    // If the driver has no vehicle model, they haven't completed signup.
     if (!driverProfile?.vehicle_model) {
       setShowOnboardingPrompt(true);
       return;
     }
+
+    // 3. STEP THREE: Approval Status Check
+    // This is a simulated check. If the driver has data, we assume they are "Approved" for now
+    // to allow testing. In a real app, we would check a 'status' field in the DB.
+    // Examples of how the logic would work if we had the field:
+    /*
+    if (driverProfile.approval_status === 'rejected') {
+        alert("Infelizmente seus dados não foram aprovados pela App Move, verifica os seus documentos regularizar");
+        return;
+    }
+    if (driverProfile.approval_status === 'in_analysis') {
+        alert("Não é possível ficar online seus dados está em análise no momento assim que for aprovado você será notificado");
+        return;
+    }
+    */
+    // For now, since we don't have the column, we proceed if vehicle data exists.
+    // If you want to force a test, you can uncomment one of the alerts above.
 
     if (driverProfile?.is_active) {
       updateDriverStatus(false, DriverStatus.OFFLINE);
@@ -351,11 +385,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     try {
       const permission = await Notification.requestPermission();
       setNotificationPermissionStatus(permission);
-      if (permission !== 'granted') {
-        setError("Permissão para notificações negada. Você não receberá alertas de novas corridas.");
-      } else {
-        setError(null);
-      }
+      // Close the modal regardless of the choice.
+      // If allowed, next click on "Ficar Online" will proceed.
+      // If denied, next click on "Ficar Online" will show modal again.
+      setShowNotificationModal(false);
     } catch (error) {
         console.error("Erro ao solicitar permissão de notificação:", error);
         setError("Ocorreu um erro ao tentar ativar as notificações.");
@@ -540,15 +573,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     updateDriverStatus(true, DriverStatus.ONLINE);
   }
   
-  const NotificationPermissionBanner = () => (
-    <div className="absolute top-24 left-1/2 -translate-x-1/2 w-11/12 bg-yellow-400 text-black p-3 rounded-lg shadow-lg z-20 text-center animate-pulse">
-        <p className="font-semibold mb-2">Receba alertas de novas corridas!</p>
-        <button onClick={handleRequestNotificationPermission} className="bg-black text-white px-4 py-1 rounded-md text-sm font-bold hover:bg-gray-800">
-            Ativar Notificações
-        </button>
-    </div>
-  );
-
   if (loading) return <div className="h-full w-full flex items-center justify-center bg-brand-primary"><p>Carregando perfil...</p></div>;
   
   const OnboardingPromptModal: React.FC<{ onContinue: () => void, onLater: () => void }> = ({ onContinue, onLater }) => (
@@ -570,6 +594,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
         </div>
     </div>
     );
+
+  const NotificationModal: React.FC<{ onActivate: () => void, onDeny: () => void }> = ({ onActivate, onDeny }) => (
+    <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div className="w-full max-w-md p-8 space-y-6 bg-brand-primary rounded-lg shadow-lg text-center">
+            <BellIcon />
+            <h2 className="text-xl font-bold text-white">Permissão Necessária</h2>
+            <p className="text-brand-light">Para não perder nenhuma corrida precisa ativar a notificação.</p>
+            <div className="flex space-x-3 pt-4">
+                 <button 
+                    onClick={onDeny}
+                    className="flex-1 p-3 font-bold text-brand-light bg-brand-secondary rounded-md hover:bg-gray-600 transition-colors">
+                    Negar
+                </button>
+                <button 
+                    onClick={onActivate} 
+                    className="flex-1 p-3 font-bold text-gray-900 bg-brand-accent rounded-md hover:bg-teal-300 transition-colors">
+                    Ativar
+                </button>
+            </div>
+        </div>
+    </div>
+  );
 
   const renderFooterContent = () => {
     if (error && !currentRide) {
@@ -694,6 +740,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
             />
         )}
         
+        {showNotificationModal && (
+            <NotificationModal 
+                onActivate={handleRequestNotificationPermission}
+                onDeny={() => setShowNotificationModal(false)}
+            />
+        )}
+        
         {/* --- Start of Slide-out Menu --- */}
         <div
             className={`absolute inset-0 bg-black bg-opacity-60 z-30 transition-opacity duration-300 ${showMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
@@ -747,8 +800,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
             </div>
         )}
         
-        {notificationPermissionStatus === 'default' && <NotificationPermissionBanner />}
-
         <MapComponent driverLocation={driverLocation} currentRide={currentRide} />
 
         <header className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/70 to-transparent">
