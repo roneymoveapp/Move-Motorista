@@ -13,27 +13,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [appError, setAppError] = useState<string | null>(null);
   // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
-  const [isDriverOnboarded, setIsDriverOnboarded] = useState(false);
-  // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
   const [forceOnboarding, setForceOnboarding] = useState(false);
-  // FIX: Replaced placeholder 'a' with the correct 'useState' hook.
-  const [showDashboardOverride, setShowDashboardOverride] = useState(false);
 
-  const checkDriverStatus = async (user_id: string) => {
-    const { data, error } = await supabase
-        .from('drivers')
-        .select('id')
-        .eq('id', user_id)
-        .single();
-    
-    if (error && error.code !== 'PGRST116') { // PGRST116: No rows found, valid for new users.
-        console.error("Error checking driver status:", error);
-        throw error;
-    }
-        
-    setIsDriverOnboarded(!!data);
-  };
-  
   useEffect(() => {
     // Register Service Worker for Firebase Messaging
     if ('serviceWorker' in navigator) {
@@ -62,21 +43,8 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
         setSession(newSession);
         
-        if (newSession) {
-            try {
-                // We await this check. If it hangs due to RLS/Connection issues,
-                // the loadingTimeout (defined outside) will eventually trigger and free the UI.
-                await checkDriverStatus(newSession.user.id);
-            } catch (error) {
-                console.error("Erro ao verificar status do motorista na mudança de autenticação:", error);
-            }
-        } else {
-            setIsDriverOnboarded(false);
-            setShowDashboardOverride(false);
-        }
-        
         // FIX: Only clear the timeout and stop loading AFTER all async checks are done.
-        // This ensures we don't get stuck in a 'loading' state if checkDriverStatus takes too long.
+        // This ensures we don't get stuck in a 'loading' state.
         clearTimeout(loadingTimeout);
         setLoading(false);
     });
@@ -88,20 +56,9 @@ const App: React.FC = () => {
   }, []);
   
   const handleOnboardingComplete = async (vehicleSubmitted: boolean) => {
-    // If the vehicle form was submitted, we need to re-check the driver status
-    // and ensure the dashboard override is turned off. A session must exist for this.
-    if (vehicleSubmitted && session) {
-        setLoading(true);
-        await checkDriverStatus(session.user.id);
-        setForceOnboarding(false);
-        setShowDashboardOverride(false);
-        setLoading(false);
-    } else if (!vehicleSubmitted) {
-        // This is from a login, a "Depois" click, or a "Back" click from the vehicle form.
-        // In all these cases, we want to stop forcing the onboarding flow and show the dashboard.
-        setForceOnboarding(false);
-        setShowDashboardOverride(true);
-    }
+    // If the vehicle form was submitted or canceled, we stop forcing the onboarding flow.
+    // The Dashboard will handle re-fetching the profile and showing the prompt again if needed.
+    setForceOnboarding(false);
   };
 
   if (appError) {
@@ -127,21 +84,19 @@ const App: React.FC = () => {
     return <AuthComponent onOnboardingComplete={handleOnboardingComplete} />;
   }
   
-  // Determine if we need to show the Auth/Onboarding component
-  const shouldShowAuth = forceOnboarding || (!isDriverOnboarded && !showDashboardOverride);
-
-  if (shouldShowAuth) {
+  // Only show Auth component if explicitly forced (user clicked "Começar Agora")
+  if (forceOnboarding) {
     // isContinuing is true if the user is already logged in but hasn't finished the vehicle step
     return <AuthComponent onOnboardingComplete={handleOnboardingComplete} isContinuing={true} />;
   }
 
-  // Otherwise, show the main dashboard
+  // Otherwise, show the main dashboard.
+  // The Dashboard itself will check if the user has a vehicle and show a popup if not.
   return (
     <Dashboard 
       key={session.user.id} 
       session={session} 
       onTriggerOnboarding={() => {
-        setShowDashboardOverride(false); // Deactivate override when forcing onboarding
         setForceOnboarding(true);
       }} 
     />

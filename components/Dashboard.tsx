@@ -140,6 +140,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     };
     
     setDriverProfile(combinedProfile);
+    
+    // AUTO-POPUP CHECK:
+    // If the driver profile loaded but vehicle data is missing, prompt immediately.
+    // This solves the issue of reloading the page and getting blocked or not knowing what to do.
+    if (!combinedProfile.vehicle_model) {
+        setShowOnboardingPrompt(true);
+    }
+
     setLoading(false);
 
   }, [session.user.id]);
@@ -353,7 +361,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     // 3. STEP THREE: Approval Status Check
     // This is a simulated check. If the driver has data, we assume they are "Approved" for now
     // to allow testing. In a real app, we would check a 'status' field in the DB.
-    // Examples of how the logic would work if we had the field:
     /*
     if (driverProfile.approval_status === 'rejected') {
         alert("Infelizmente seus dados não foram aprovados pela App Move, verifica os seus documentos regularizar");
