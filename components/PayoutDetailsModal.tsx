@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import type { DriverPayoutDetails } from '../types';
@@ -9,7 +10,7 @@ interface PayoutDetailsModalProps {
   onClose: () => void;
 }
 
-type PayoutView = 'LOADING' | 'CHOICE' | 'CARD_FORM' | 'PIX_FORM' | 'VIEW_BALANCE';
+type PayoutView = 'LOADING' | 'CHOICE' | 'CARD_FORM' | 'PIX_FORM' | 'VIEW_BALANCE' | 'PAY_DEBT_CHOICE' | 'PAY_DEBT_PIX' | 'PAY_DEBT_CONFIRM';
 
 // Função para formatar o CPF
 const formatCPF = (value: string): string => {
@@ -31,6 +32,7 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
   const [view, setView] = useState<PayoutView>('LOADING');
   const [details, setDetails] = useState<Partial<DriverPayoutDetails>>({});
   const [balance, setBalance] = useState(0);
+  const [feesOwed, setFeesOwed] = useState(0);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   
@@ -61,7 +63,7 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
           .single(),
         supabase
           .from('drivers')
-          .select('balance')
+          .select('balance, fees_owed')
           .eq('id', session.user.id)
           .single()
       ]);
@@ -71,6 +73,7 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
 
       if (driverData) {
         setBalance(driverData.balance);
+        setFeesOwed(driverData.fees_owed || 0);
       } else if (driverError) {
         console.error("Error fetching driver balance:", driverError);
         setMessage("Erro ao carregar seu saldo.");
@@ -186,12 +189,37 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
     }
     setSaving(false);
   };
+
+  const handlePayDebt = async () => {
+    setSaving(true);
+    // Simulating API call to payment gateway
+    setTimeout(async () => {
+        // Reset debt in database (Mocking backend payment webhook)
+        const { error } = await supabase
+            .from('drivers')
+            .update({ fees_owed: 0, status: 'online' }) // Also put online if they were blocked
+            .eq('id', session.user.id);
+
+        if (error) {
+            setMessage('Erro ao processar pagamento.');
+        } else {
+            setFeesOwed(0);
+            setMessage('Pagamento realizado com sucesso! Sua conta foi desbloqueada.');
+            setTimeout(() => {
+                onClose();
+            }, 2000);
+        }
+        setSaving(false);
+    }, 2000);
+  };
   
   const getTitle = () => {
       switch(view) {
           case 'CHOICE': return 'Forma de Recebimento';
           case 'CARD_FORM': return 'Dados do Cartão';
           case 'PIX_FORM': return 'Chave Pix';
+          case 'PAY_DEBT_CHOICE': return 'Pagar Dívida';
+          case 'PAY_DEBT_PIX': return 'Pagamento Pix';
           case 'VIEW_BALANCE':
           default:
               return 'Minha Carteira';
@@ -209,29 +237,51 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
         <div className="bg-brand-secondary p-4 rounded-lg">
             <div className="flex justify-between items-center">
                 <div>
-                    <p className="text-sm text-brand-light">Saldo atual</p>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-sm text-brand-light">Saldo atual (Ganhos)</p>
+                    <p className="text-2xl font-bold text-green-400">
                         {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </p>
                 </div>
                 <button className="px-4 py-2 font-bold text-gray-900 bg-brand-accent rounded-md hover:bg-teal-300">Receber</button>
             </div>
         </div>
-        <div className="bg-brand-secondary p-4 rounded-lg">
+        
+        {/* Seção de Dívida */}
+        <div className={`bg-brand-secondary p-4 rounded-lg border ${feesOwed >= 50 ? 'border-red-500' : 'border-transparent'}`}>
             <div className="flex justify-between items-center">
                 <div>
-                    <p className="text-sm text-brand-light">Saldo a pagar</p>
-                    <p className="text-2xl font-bold text-white">R$ 0,00</p>
+                    <p className="text-sm text-brand-light">Taxas Pendentes</p>
+                    <p className={`text-2xl font-bold ${feesOwed > 0 ? 'text-red-400' : 'text-white'}`}>
+                        {feesOwed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </p>
                 </div>
-                <button className="px-4 py-2 font-bold text-white bg-red-500 rounded-md hover:bg-red-600">Pagar</button>
+                {feesOwed > 0 ? (
+                     <button 
+                        onClick={() => setView('PAY_DEBT_CHOICE')}
+                        className="px-4 py-2 font-bold text-white bg-red-500 rounded-md hover:bg-red-600 animate-pulse">
+                        Pagar
+                    </button>
+                ) : (
+                    <button disabled className="px-4 py-2 font-bold text-gray-500 bg-gray-700 rounded-md cursor-not-allowed">
+                        Quitado
+                    </button>
+                )}
             </div>
+            {feesOwed >= 50 && (
+                <p className="text-xs text-red-400 mt-2">
+                    {feesOwed >= 60 
+                        ? "Limite excedido. Pague agora para desbloquear." 
+                        : "Atenção: Você está próximo do limite de R$ 60,00."}
+                </p>
+            )}
         </div>
+
         <div className="pt-4">
              <button
                 onClick={() => setView('CHOICE')}
                 className="w-full p-3 font-bold text-white bg-gray-600 rounded-md hover:bg-gray-500"
             >
-                Mudar Forma de Pagamento
+                Mudar Forma de Recebimento
             </button>
         </div>
       </div>
@@ -258,10 +308,77 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
   );
   
   const BackButton = () => (
-    <button onClick={onClose} className="p-2 absolute left-2 top-3.5">
+    <button onClick={() => setView('VIEW_BALANCE')} className="p-2 absolute left-2 top-3.5">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
     </button>
   );
+
+  // --- TELAS DE PAGAMENTO DE DÍVIDA (MVP) ---
+
+  const renderPayDebtChoice = () => (
+      <div className="p-6 space-y-4">
+        <p className="text-center text-white font-bold mb-4">
+            Valor a pagar: <span className="text-red-400">{feesOwed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+        </p>
+        <p className="text-center text-brand-light text-sm mb-6">Escolha como deseja pagar a taxa da plataforma:</p>
+        
+        <button
+            onClick={() => setView('PAY_DEBT_PIX')}
+            className="w-full p-4 font-bold text-white bg-green-600 rounded-md hover:bg-green-700 flex items-center justify-center space-x-3"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22v-5"/><path d="M10 15H5.343a8 8 0 1 1 13.314 0H14"/><path d="m14 12-2-3-2 3"/><path d="M12 10V3"/><path d="M10 3h4"/></svg>
+            <span>Pagar via Pix (Liberação Imediata)</span>
+        </button>
+        
+        <button
+            onClick={handlePayDebt} // Simulate card payment directly for now
+            className="w-full p-4 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 flex items-center justify-center space-x-3"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <span>Pagar com Cartão Cadastrado</span>
+        </button>
+        
+        {saving && <p className="text-center text-brand-accent mt-2">Processando...</p>}
+        {message && <p className="text-center text-green-400 mt-2">{message}</p>}
+      </div>
+  );
+
+  const renderPayDebtPix = () => (
+      <div className="p-6 space-y-6 text-center">
+        <h3 className="text-white font-bold">Escaneie o QR Code</h3>
+        <div className="bg-white p-4 rounded-lg inline-block mx-auto">
+            {/* Placeholder QR Code - In production this would be generated by the gateway */}
+            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=00020126360014BR.GOV.BCB.PIX0114+5511999999995204000053039865802BR5913AppMove6009SAOPAULO62070503***6304C40C`} alt="QR Code Pix" />
+        </div>
+        
+        <div className="bg-gray-800 p-3 rounded text-left">
+            <p className="text-xs text-gray-400 mb-1">Código Copia e Cola:</p>
+            <p className="text-xs text-white break-all font-mono select-all">
+                00020126360014BR.GOV.BCB.PIX0114+5511999999995204000053039865802BR5913AppMove6009SAOPAULO62070503***6304C40C
+            </p>
+        </div>
+
+        <button 
+            onClick={() => {
+                navigator.clipboard.writeText("00020126360014BR.GOV.BCB.PIX0114+5511999999995204000053039865802BR5913AppMove6009SAOPAULO62070503***6304C40C");
+                alert("Código copiado!");
+            }}
+            className="text-brand-accent text-sm font-bold underline"
+        >
+            Copiar Código
+        </button>
+
+        <button 
+            onClick={handlePayDebt}
+            disabled={saving}
+            className="w-full p-3 font-bold text-gray-900 bg-brand-accent rounded-md hover:bg-teal-300"
+        >
+            {saving ? 'Verificando...' : 'Já fiz o pagamento'}
+        </button>
+        {message && <p className="text-center text-green-400 mt-2">{message}</p>}
+      </div>
+  );
+
 
   const renderCardForm = () => {
     const isCpfValid = cardForm.cpf.replace(/\D/g, '').length === 11;
@@ -347,6 +464,8 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
         case 'CARD_FORM': return renderCardForm();
         case 'PIX_FORM': return renderPixForm();
         case 'VIEW_BALANCE': return renderViewBalance();
+        case 'PAY_DEBT_CHOICE': return renderPayDebtChoice();
+        case 'PAY_DEBT_PIX': return renderPayDebtPix();
         case 'LOADING':
         default:
             return renderLoading();
@@ -357,7 +476,7 @@ export const PayoutDetailsModal: React.FC<PayoutDetailsModalProps> = ({ session,
     <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div className="bg-brand-primary rounded-lg shadow-xl w-full max-w-sm">
         <header className="p-4 bg-brand-secondary flex justify-center items-center rounded-t-lg relative">
-            {(view === 'CARD_FORM' || view === 'PIX_FORM') && <BackButton />}
+            {(view !== 'VIEW_BALANCE' && view !== 'LOADING') && <BackButton />}
             <h2 className="text-lg font-bold">{getTitle()}</h2>
             <button onClick={onClose} className="text-2xl font-bold absolute right-4 top-2">&times;</button>
         </header>

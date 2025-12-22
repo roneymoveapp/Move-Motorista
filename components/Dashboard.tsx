@@ -74,6 +74,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const [showOnboardingPrompt, setShowOnboardingPrompt] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  
+  // States for Debt Management
+  const [debtModalState, setDebtModalState] = useState<'WARNING' | 'BLOCK' | null>(null);
 
 
   const watchId = useRef<number | null>(null);
@@ -129,6 +132,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
         is_active: driverData?.is_active ?? false,
         status: driverData?.status ?? DriverStatus.OFFLINE,
         balance: driverData?.balance ?? 0,
+        fees_owed: driverData?.fees_owed ?? 0, // Added fees_owed
         vehicle_model: driverData?.vehicle_model ?? '',
         vehicle_color: driverData?.vehicle_color ?? '',
         license_plate: driverData?.license_plate ?? '',
@@ -141,6 +145,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     
     setDriverProfile(combinedProfile);
     
+    // Check Debt Status Logic (Warning Only)
+    // We check only warning here to not block the UI immediately upon login unless necessary logic dictates.
+    // The "Block" logic is strictly enforced when trying to go Online.
+    // However, if they are already actively blocked by DB, we can show it.
+    if (combinedProfile.fees_owed >= 60) {
+        // Hard limit check (Block)
+        // If status is online but debt is high (maybe DB didn't catch it yet or race condition), force offline
+        if (combinedProfile.is_active) {
+             updateDriverStatus(false, DriverStatus.OFFLINE);
+        }
+        // We set the modal to block if they try to work, but let's show it if they are browsing too.
+        // setDebtModalState('BLOCK'); // Optional: show immediately
+    } else if (combinedProfile.fees_owed >= 50) {
+         // Soft limit check (Warning)
+         // Only show if not previously dismissed in session? For now, we show it.
+         setDebtModalState('WARNING');
+    }
+
     // AUTO-POPUP CHECK:
     // If the driver profile loaded but vehicle data is missing, prompt immediately.
     // This solves the issue of reloading the page and getting blocked or not knowing what to do.
@@ -157,9 +179,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
         setShowPayoutDetails(true);
     }
   }, [showPayoutsOnMount]);
-
-  // Effect to check notification permission on mount removed per user request.
-  // The check is now done exclusively on the "Ficar Online" button.
 
   // Effect for Push Notifications
   useEffect(() => {
@@ -344,35 +363,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
   }, [session.user.id, fetchDriverProfile]);
 
   const handleToggleOnline = () => {
+    // 0. STEP ZERO: DEBT CHECK (Limit R$ 60)
+    if (!driverProfile?.is_active && driverProfile && driverProfile.fees_owed >= 60) {
+        setDebtModalState('BLOCK');
+        return;
+    }
+
     // 1. STEP ONE: Notification Permission Check
-    // If not granted, we block the action and show the specific modal.
     if (!driverProfile?.is_active && Notification.permission !== 'granted') {
         setShowNotificationModal(true);
         return;
     }
 
     // 2. STEP TWO: Onboarding/Vehicle Data Check
-    // If the driver has no vehicle model, they haven't completed signup.
     if (!driverProfile?.vehicle_model) {
       setShowOnboardingPrompt(true);
       return;
     }
-
-    // 3. STEP THREE: Approval Status Check
-    // This is a simulated check. If the driver has data, we assume they are "Approved" for now
-    // to allow testing. In a real app, we would check a 'status' field in the DB.
-    /*
-    if (driverProfile.approval_status === 'rejected') {
-        alert("Infelizmente seus dados não foram aprovados pela App Move, verifica os seus documentos regularizar");
-        return;
-    }
-    if (driverProfile.approval_status === 'in_analysis') {
-        alert("Não é possível ficar online seus dados está em análise no momento assim que for aprovado você será notificado");
-        return;
-    }
-    */
-    // For now, since we don't have the column, we proceed if vehicle data exists.
-    // If you want to force a test, you can uncomment one of the alerts above.
 
     if (driverProfile?.is_active) {
       updateDriverStatus(false, DriverStatus.OFFLINE);
@@ -392,9 +399,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     try {
       const permission = await Notification.requestPermission();
       setNotificationPermissionStatus(permission);
-      // Close the modal regardless of the choice.
-      // If allowed, next click on "Ficar Online" will proceed.
-      // If denied, next click on "Ficar Online" will show modal again.
       setShowNotificationModal(false);
     } catch (error) {
         console.error("Erro ao solicitar permissão de notificação:", error);
@@ -519,18 +523,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
 
   const handleCompleteRide = async () => {
     if (!currentRide) return;
-
-    // 1. Marca a corrida como concluída no banco de dados.
-    // Esta ação acionará a função 'handle_ride_completion' no Supabase,
-    // que calcula os ganhos de forma segura com comissão dinâmica e atualiza o saldo do motorista.
     const completedRide = await updateRideStatus(currentRide.id, { status: RideStatus.COMPLETED });
 
     if (completedRide) {
-      // 2. O backend é agora a única fonte da verdade para o saldo.
-      // Nós apenas precisamos buscar o perfil novamente para obter o saldo atualizado do banco de dados.
       await fetchDriverProfile();
-
-      // 3. Procede para o modal de avaliação.
       setRatingRideId(completedRide.id);
       setCurrentRide(null);
     }
@@ -623,6 +619,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
         </div>
     </div>
   );
+
+  const DebtModal: React.FC = () => {
+      const isBlock = debtModalState === 'BLOCK';
+      const debtAmount = driverProfile?.fees_owed || 0;
+
+      return (
+        <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+            <div className="w-full max-w-md p-8 space-y-6 bg-brand-primary rounded-lg shadow-lg text-center border-2 border-red-500">
+                <div className="text-red-500 mb-2 flex justify-center">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <h2 className="text-2xl font-bold text-white">{isBlock ? 'Conta Temporariamente Bloqueada' : 'Aviso de Limite'}</h2>
+                <p className="text-brand-light">
+                    {isBlock 
+                        ? `Você atingiu o limite de R$ 60,00 em taxas acumuladas. Sua dívida atual é de ${debtAmount.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}.`
+                        : `Você atingiu R$ 50,00 em taxas. Ao atingir R$ 60,00 você deixará de receber novas corridas.`
+                    }
+                </p>
+                <p className="text-sm text-gray-400">
+                    {isBlock ? 'Realize o pagamento agora para voltar a ficar online.' : 'Regularize sua situação para evitar bloqueios.'}
+                </p>
+                
+                <div className="flex flex-col space-y-3 pt-4">
+                     <button 
+                        onClick={() => {
+                            setDebtModalState(null);
+                            setShowPayoutDetails(true);
+                        }}
+                        className="w-full p-3 font-bold text-gray-900 bg-brand-accent rounded-md hover:bg-teal-300 transition-colors">
+                        Pagar Agora
+                    </button>
+                    {!isBlock && (
+                        <button 
+                            onClick={() => setDebtModalState(null)}
+                            className="w-full p-3 font-bold text-brand-light bg-brand-secondary rounded-md hover:bg-gray-600 transition-colors">
+                            Depois
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+      );
+  };
+
 
   const renderFooterContent = () => {
     if (error && !currentRide) {
@@ -737,6 +777,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
     <div className="relative h-full w-full overflow-hidden">
         {locationPermission !== 'granted' && <LocationPermissionModal state={locationPermission} onRequest={requestLocationAndFetchProfile} />}
         
+        {/* Modal de Dívida */}
+        {debtModalState && <DebtModal />}
+
         {showOnboardingPrompt && (
             <OnboardingPromptModal
                 onContinue={() => {
@@ -871,7 +914,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, showPayoutsOnMoun
             <ScheduledRidesModal session={session} onClose={() => setShowScheduledRides(false)} />
         )}
         {showPayoutDetails && (
-            <PayoutDetailsModal session={session} onClose={() => setShowPayoutDetails(false)} />
+            <PayoutDetailsModal session={session} onClose={() => { setShowPayoutDetails(false); fetchDriverProfile(); }} />
         )}
         {showProfile && (
             <ProfileModal session={session} onClose={() => { setShowProfile(false); fetchDriverProfile(); }} />

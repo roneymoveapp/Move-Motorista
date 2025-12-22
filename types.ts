@@ -1,3 +1,4 @@
+
 export enum DriverStatus {
   ONLINE = 'online',
   OFFLINE = 'offline',
@@ -59,6 +60,7 @@ export interface DriverProfile {
   driver_license_number: string;
   cpf: string;
   balance: number; // Saldo do motorista
+  fees_owed: number; // Dívida acumulada (taxas da plataforma)
   average_rating?: number; // Avaliação média do motorista
   // This will hold the related data from the `profiles` table
   profiles?: { full_name: string };
