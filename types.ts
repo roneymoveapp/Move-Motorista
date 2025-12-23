@@ -31,8 +31,15 @@ export interface RideStop {
 export interface Ride {
   id: string;
   user_id: string;
-  from_location: string; // Should be parsed JSON or a specific type
-  to_location: string; // e.g., { lat: number, lng: number, address: string }
+  from_location: string; // Legacy/Fallback: JSON string
+  to_location: string; // Legacy/Fallback: JSON string
+  
+  // New explicit coordinate columns for direct GPS usage
+  origin_latitude?: number;
+  origin_longitude?: number;
+  destination_latitude?: number;
+  destination_longitude?: number;
+
   estimated_price: number;
   final_price?: number;
   status: RideStatus;
@@ -40,14 +47,12 @@ export interface Ride {
   created_at: string;
   vehicle_type: string;
   payment_status?: string; // e.g., 'PENDING', 'COMPLETED'
-  current_stop_order: number; // New field to track ride progress
-  // This will hold the related passenger data from the `profiles` table
+  current_stop_order: number; 
   profiles: Profile | null;
-  // This will hold related stops
   ride_stops: RideStop[];
 }
 
-// Represents the `drivers` table data, now including vehicle details and related profile
+// Represents the `drivers` table data
 export interface DriverProfile {
   id: string;
   is_active: boolean;
@@ -59,10 +64,9 @@ export interface DriverProfile {
   license_plate: string;
   driver_license_number: string;
   cpf: string;
-  balance: number; // Saldo do motorista
-  fees_owed: number; // Dívida acumulada (taxas da plataforma)
-  average_rating?: number; // Avaliação média do motorista
-  // This will hold the related data from the `profiles` table
+  balance: number;
+  fees_owed: number;
+  average_rating?: number;
   profiles?: { full_name: string };
 }
 
@@ -88,7 +92,7 @@ export interface ScheduledRide {
     vehicle_type: string;
     scheduled_for: string;
     status: string;
-    driver_id: string | null; // New field for the assigned driver
+    driver_id: string | null;
     profiles: { full_name: string } | null;
 }
 
@@ -105,8 +109,8 @@ export interface DriverPayoutDetails {
 export interface Tariff {
     id: number;
     name: string;
-    start_time: string; // "HH:mm:ss"
-    end_time: string; // "HH:mm:ss"
+    start_time: string;
+    end_time: string;
     min_fare: number;
     per_km: number;
     per_min: number;
