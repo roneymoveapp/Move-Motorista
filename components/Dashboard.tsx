@@ -61,7 +61,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onTriggerOnboardi
   const [debtModalState, setDebtModalState] = useState<'WARNING' | 'BLOCK' | null>(null);
 
   const watchId = useRef<number | null>(null);
-  const updateTimeout = useRef<number | null>(null);
 
   const fetchDriverProfile = useCallback(async () => {
     setLoading(true);
@@ -102,6 +101,42 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onTriggerOnboardi
     await supabase.from('drivers').update({ is_active, status }).eq('id', session.user.id);
   }, [driverProfile, session.user.id]);
 
+  // FIX: Added real-time location tracking logic
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      // Começa a observar a posição do motorista
+      watchId.current = navigator.geolocation.watchPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          const newLocation = { lat: latitude, lng: longitude };
+          
+          // Atualiza o estado local para o mapa
+          setDriverLocation(newLocation);
+          setLocationPermission('granted');
+
+          // Sincroniza a localização com o Supabase para o passageiro ver
+          await supabase.from('drivers').update({
+            current_latitude: latitude,
+            current_longitude: longitude
+          }).eq('id', session.user.id);
+        },
+        (err) => {
+          console.error("Erro ao obter localização:", err);
+          if (err.code === 1) setLocationPermission('denied');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      console.error("Geolocalização não suportada.");
+    }
+
+    return () => {
+      if (watchId.current !== null) {
+        navigator.geolocation.clearWatch(watchId.current);
+      }
+    };
+  }, [session.user.id]);
+
   const handleNavigate = () => {
     if (!currentRide) return;
     let dest: LatLng | null = null;
@@ -135,6 +170,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onTriggerOnboardi
     <div className="relative h-full w-full overflow-hidden">
         <MapComponent driverLocation={driverLocation} currentRide={currentRide} />
         
+        {locationPermission !== 'granted' && (
+            <LocationPermissionModal 
+                state={locationPermission} 
+                onRequest={() => {
+                    navigator.geolocation.getCurrentPosition(() => setLocationPermission('granted'));
+                }} 
+            />
+        )}
+
         <header className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/70 to-transparent">
             <button onClick={() => setShowMenu(true)} className="p-2 bg-brand-secondary rounded-full text-white"><MenuIcon /></button>
             <div className="flex items-center space-x-2">
